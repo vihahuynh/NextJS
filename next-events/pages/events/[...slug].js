@@ -1,16 +1,17 @@
+import { getFilteredEvents } from "@/helpers/api-utils";
 import EventList from "@/components/events/event-list";
-import { getFilteredEvents } from "@/dummy-data";
-import { useRouter } from "next/router";
 
-const FilteredEventsPage = () => {
-  const router = useRouter();
-  const filter = router.query.slug;
+const FilteredEventsPage = (props) => {
+  if (props.events?.length === 0) return <p>No events found</p>;
+  return <EventList events={props.filterEvents} />;
+};
 
-  if (!filter) {
-    return <p className="center">Loading...</p>;
-  }
+export default FilteredEventsPage;
 
-  const [filterYear, filterMonth] = filter;
+export async function getServerSideProps(context) {
+  const { params } = context;
+
+  const [filterYear, filterMonth] = params.slug;
 
   const numYear = +filterYear;
   const numMonth = +filterMonth;
@@ -23,21 +24,14 @@ const FilteredEventsPage = () => {
     numMonth > 12 ||
     numMonth < 1
   ) {
-    return <p className="center">Invalid filter</p>;
+    return {
+      notFound: true,
+    };
   }
-
-  const events = getFilteredEvents({
+  const filterEvents = await getFilteredEvents({
     year: numYear,
     month: numMonth,
   });
 
-  if (events?.length === 0) return <p>No events found</p>;
-
-  return (
-    <div>
-      <EventList events={events} />
-    </div>
-  );
-};
-
-export default FilteredEventsPage;
+  return { props: { filterEvents, year: numYear, month: numMonth } };
+}
