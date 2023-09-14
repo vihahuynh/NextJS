@@ -18,7 +18,7 @@ const handler = async (req, res) => {
     let client;
     try {
       client = await MongoClient.connect(
-        "mongodb+srv://<username>:<password>@cluster0.ktqca.mongodb.net/next-blogs"
+        `mongodb+srv://${process.env.mongodb_username}:${process.env.mongodb_password}@cluster0.ktqca.mongodb.net/${process.env.mongodb_database}`
       );
     } catch (err) {
       console.log("err: ", err);
